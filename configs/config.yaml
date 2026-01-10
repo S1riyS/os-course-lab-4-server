@@ -1,9 +1,9 @@
 app:
-  port: 8080
+  port: 8081
   default_timeout: 5s
 
 database:
-  port: 5432
+  port: 15432
   host: localhost
   user: postgres
   password: postgres
