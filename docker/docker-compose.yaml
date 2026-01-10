@@ -12,6 +12,7 @@ services:
       - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ../migrations:/etc/migrations
 
 volumes:
   postgres_data:
