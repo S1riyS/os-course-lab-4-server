@@ -46,17 +46,19 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 		level = color.RedString(level)
 	}
 
-	fields := make(map[string]interface{}, r.NumAttrs())
+	// First add attrs from handler (added via With()), then from record
+	fields := make(map[string]interface{}, r.NumAttrs()+len(h.attrs))
 
-	r.Attrs(func(a slog.Attr) bool {
-		fields[a.Key] = a.Value.Any()
-
-		return true
-	})
-
+	// Add handler attrs first (they have priority)
 	for _, a := range h.attrs {
 		fields[a.Key] = a.Value.Any()
 	}
+
+	// Then add record attrs (may override handler attrs if same key)
+	r.Attrs(func(a slog.Attr) bool {
+		fields[a.Key] = a.Value.Any()
+		return true
+	})
 
 	var b []byte
 	var err error
@@ -82,10 +84,15 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 }
 
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	// Combine existing attrs with new ones
+	combinedAttrs := make([]slog.Attr, 0, len(h.attrs)+len(attrs))
+	combinedAttrs = append(combinedAttrs, h.attrs...)
+	combinedAttrs = append(combinedAttrs, attrs...)
+
 	return &PrettyHandler{
-		Handler: h.Handler,
+		Handler: h.Handler.WithAttrs(attrs), // This ensures attrs are in the record
 		l:       h.l,
-		attrs:   attrs,
+		attrs:   combinedAttrs, // This ensures attrs are in our custom fields map
 	}
 }
 
