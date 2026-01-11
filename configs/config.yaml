@@ -3,8 +3,8 @@ app:
   default_timeout: 5s
 
 database:
-  port: 15432
-  host: localhost
+  port: 5432
+  host: postgres
   user: postgres
   password: postgres
   dbname: os_lab4

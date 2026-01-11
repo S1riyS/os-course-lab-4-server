@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -13,6 +11,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../migrations:/etc/migrations
+    networks:
+      - app_network
+  app:
+    build:
+      context: .. # Build context is root dir of project
+      dockerfile: docker/Dockerfile
+    volumes:
+      - ../configs:/app/configs:ro
+    restart: unless-stopped
+    ports:
+      - "8082:8082" # For application port see config.yaml
+    networks:
+      - app_network
 
 volumes:
   postgres_data:
+
+networks:
+  app_network:
