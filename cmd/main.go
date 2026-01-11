@@ -13,6 +13,7 @@ import (
 
 	"github.com/S1riyS/os-course-lab-4/server/internal/config"
 	"github.com/S1riyS/os-course-lab-4/server/internal/handler"
+	"github.com/S1riyS/os-course-lab-4/server/internal/middleware"
 	"github.com/S1riyS/os-course-lab-4/server/internal/repository"
 	"github.com/S1riyS/os-course-lab-4/server/internal/service"
 	"github.com/S1riyS/os-course-lab-4/server/pkg/database/postgresql"
@@ -53,10 +54,13 @@ func main() {
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
+	// Middlewares
+	handler := middleware.RequestIDMiddleware(mux)
+
 	// HTTP Server
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.App.Port),
-		Handler:      mux,
+		Handler:      handler,
 		ReadTimeout:  cfg.App.DefaultTimeout,
 		WriteTimeout: cfg.App.DefaultTimeout,
 		BaseContext:  func(_ net.Listener) context.Context { return ctx },
